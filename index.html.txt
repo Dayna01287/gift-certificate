@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Твой подарок</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        background: #0e0e0e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .card {
+        position: relative;
+        width: 320px;
+        aspect-ratio: 1240 / 1748;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0,0,0,.7);
+        background: #000;
+    }
+
+    .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    canvas {
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+    }
+
+    .hint {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 18px;
+        color: #fff;
+        letter-spacing: 1px;
+        pointer-events: none;
+        mix-blend-mode: difference;
+    }
+
+    .btn {
+        position: absolute;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 22px;
+        background: #000;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 15px;
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- РЕАЛЬНЫЙ МАКЕТ -->
+    <img src="certificate.jpg" alt="Подарочный сертификат">
+
+    <!-- SCRATCH -->
+    <canvas id="scratch"></canvas>
+    <div class="hint">Сотри, чтобы<br>увидеть подарок 🖤</div>
+
+    <a class="btn" href="https://instagram.com" target="_blank">
+        Записаться
+    </a>
+</div>
+
+<script>
+const canvas = document.getElementById('scratch');
+const ctx = canvas.getContext('2d');
+const card = document.querySelector('.card');
+const btn = document.querySelector('.btn');
+
+canvas.width = card.offsetWidth;
+canvas.height = card.offsetHeight;
+
+// СКРЕТЧ-СЛОЙ
+ctx.fillStyle = '#7d7d7d';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// текстура
+for (let i = 0; i < 9000; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.6})`;
+    ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
+}
+
+ctx.globalCompositeOperation = 'destination-out';
+
+let scratching = false;
+
+function scratch(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+canvas.addEventListener('mousedown', () => scratching = true);
+canvas.addEventListener('mouseup', () => scratching = false);
+canvas.addEventListener('mouseleave', () => scratching = false);
+
+canvas.addEventListener('mousemove', e => {
+    if (!scratching) return;
+    scratch(e.offsetX, e.offsetY);
+    check();
+});
+
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    scratch(t.clientX - rect.left, t.clientY - rect.top);
+    check();
+}, { passive: false });
+
+function check() {
+    const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    let cleared = 0;
+    for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] === 0) cleared++;
+    }
+    if (cleared > pixels.length / 6) {
+        canvas.style.display = 'none';
+        document.querySelector('.hint').style.display = 'none';
+        btn.style.display = 'block';
+    }
+}
+</script>
+
+</body>
+</html>
