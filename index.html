@@ -25,17 +25,16 @@
         background: #000;
     }
 
-    .card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+   .card img {
+    position: relative;
+    z-index: 1;
     }
 
     canvas {
         position: absolute;
-        inset: 0;
-        cursor: pointer;
+    inset: 0;
+    cursor: pointer;
+    z-index: 2;
     }
 
     .hint {
@@ -138,10 +137,11 @@ function check() {
     for (let i = 3; i < pixels.length; i += 4) {
         if (pixels[i] === 0) cleared++;
     }
-    if (cleared > pixels.length / 6) {
-        canvas.style.display = 'none';
-        document.querySelector('.hint').style.display = 'none';
-        btn.style.display = 'block';
+    if (cleared > pixels.length / 5) {
+    canvas.style.pointerEvents = 'none';
+    canvas.style.opacity = '0';
+    document.querySelector('.hint').style.display = 'none';
+    btn.style.display = 'block';
     }
 }
 </script>
